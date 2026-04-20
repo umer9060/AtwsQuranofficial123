@@ -28,7 +28,7 @@ export function Layout({ children }: LayoutProps) {
   );
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const publicPaths = ["/", "/login", "/register", "/library"];
+  const publicPaths = ["/", "/login", "/register", "/library", "/scholars"];
   if (!user || publicPaths.includes(location)) {
     return <>{children}</>;
   }

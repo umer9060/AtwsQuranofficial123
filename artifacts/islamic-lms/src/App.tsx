@@ -25,6 +25,7 @@ import Payments from "@/pages/payments";
 import Verification from "@/pages/verification";
 import GlobalSearch from "@/pages/search";
 import DarseNizami from "@/pages/dars-e-nizami";
+import Scholars from "@/pages/scholars";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       <Route path="/library" component={DarseNizami} />
+      <Route path="/scholars" component={Scholars} />
 
       {/* Protected routes — require login */}
       <Route path="/dashboard" component={Dashboard} />
