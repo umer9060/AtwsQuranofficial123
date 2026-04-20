@@ -6,11 +6,10 @@ import {
   BookMarked, Mic2, Scroll, Heart, Shield, Clock, Award
 } from "lucide-react";
 
-const WA_CONTACT = "https://wa.me/message/RCWLPSMMGS5GK1";
+const WA_ADMIN = "https://wa.me/message/RCWLPSMMGS5GK1";
+const WA_BOYS = WA_ADMIN;
+const WA_GIRLS = WA_ADMIN;
 const WA_CHANNEL = "https://whatsapp.com/channel/0029Vb8LsW0GU3BP0tiLAB1A";
-const WA_BOYS = WA_CONTACT + "?text=Boys+Admission+Inquiry";
-const WA_GIRLS = WA_CONTACT + "?text=Girls+Admission+Inquiry";
-const WA_ADMIN = WA_CONTACT;
 
 const LANGS: Record<string, Record<string, string>> = {
   en: {
