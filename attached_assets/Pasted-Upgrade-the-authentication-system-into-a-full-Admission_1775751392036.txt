@@ -1,0 +1,158 @@
+Upgrade the authentication system into a full Admission & Verification System.
+
+========================
+1. STUDENT REGISTRATION FORM
+========================
+
+Collect the following fields:
+
+- Username
+- Full Name
+- Email (Gmail)
+- Phone Number
+- Father / Mother Name
+- Age
+
+IF Age < 18:
+  - Require B-Form upload (image or PDF)
+
+IF Age >= 18:
+  - Require CNIC upload (image or PDF)
+
+- Profile Picture (required, clear face)
+
+- Current Class
+- Last Education Level
+
+========================
+2. STUDENT VERIFICATION FLOW
+========================
+
+After registration:
+
+STEP 1:
+- Student uploads profile photo
+
+STEP 2:
+- Admin reviews data
+
+STEP 3:
+- Admin schedules video call test
+
+STEP 4:
+- After test:
+   ✔ Approve → Admission Granted
+   ❌ Reject → Reason given
+
+========================
+3. TEACHER PROFILE SYSTEM
+========================
+
+Teacher must provide:
+
+- Full Name
+- Profile Image (clear face)
+- Education Details
+- Courses Studied (Tajweed, Fiqh, etc.)
+- Teaching Experience
+- Current Teaching Role
+
+Languages:
+- Urdu
+- Arabic
+- English
+- Pashto (optional selection)
+
+Videos:
+- Minimum 5 demo lecture videos
+
+========================
+4. USER PROFILES
+========================
+
+Student Profile:
+- Image
+- Class
+- Progress
+- Courses
+
+Teacher Profile:
+- Image
+- Qualification
+- Languages
+- Videos
+- Bio
+
+========================
+5. GOOGLE SHEETS INTEGRATION
+========================
+
+All registrations auto-send to Google Sheets:
+
+Fields:
+- Name
+- Phone
+- Age
+- CNIC/B-Form link
+- Status (Pending/Approved)
+
+========================
+6. PAYMENT SYSTEM
+========================
+
+Manual + Online methods:
+
+Pakistan:
+- Easypaisa
+- JazzCash
+- Bank Transfer
+
+International:
+- Payoneer
+- Fiverr
+- Upwork
+- Binance
+
+Admin manually verifies payments
+
+========================
+7. SECURITY SYSTEM (VERY IMPORTANT)
+========================
+
+- Secure authentication (JWT or session-based)
+- Password hashing (bcrypt)
+- File upload protection
+- Rate limiting (anti spam)
+- Admin-only access control
+- HTTPS required
+
+- Prevent:
+  ✔ SQL Injection
+  ✔ XSS attacks
+  ✔ Unauthorized access
+
+========================
+8. ADMIN PANEL
+========================
+
+Admin can:
+
+- View all students
+- Approve / Reject
+- View documents (CNIC/B-Form)
+- Schedule tests
+- Verify payments
+- Manage teachers
+
+========================
+IMPORTANT:
+========================
+
+- Clean UI (Urdu + Islamic theme)
+- Mobile responsive
+- Fast loading
+- Do NOT break existing system
+
+After completion confirm:
+
+"SECURE ADMISSION SYSTEM READY"

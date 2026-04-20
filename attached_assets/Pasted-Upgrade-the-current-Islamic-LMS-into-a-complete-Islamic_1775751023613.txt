@@ -1,0 +1,124 @@
+Upgrade the current Islamic LMS into a complete Islamic Digital Platform with the following modules:
+
+========================
+1. ISLAMIC LIBRARY SYSTEM
+========================
+
+Create a new section called "Islamic Library".
+
+Sub-sections:
+
+1. Noorani Qaida
+- Admin can upload PDF or Google Drive link
+- Display PDF viewer inside website
+
+2. Quran (Taj Company PDF)
+- Full Quran PDF display (read-only)
+- Smooth page navigation
+
+3. Quran Translation
+- Separate section for translation text
+
+4. Quran Tafsir
+- Separate section for Tafsir
+
+5. Books Library
+- All Dars-e-Nizami / Madrasa books
+- Class-wise:
+  - Class 1 to Class 8
+- Only show book names
+- Admin adds link → auto attach to book
+
+========================
+2. ULAMA PROFILE SYSTEM
+========================
+
+Create a section "Ulama / Scholars"
+
+Each profile includes:
+- Profile Image (clean face image)
+- Name
+- Short Bio
+
+Sections inside profile:
+- YouTube Videos (embed playlist or channel)
+- Facebook Videos (embed)
+- Books (list of authored books)
+
+Admin can:
+- Add / Edit / Delete scholars
+- Add social links
+
+========================
+3. AI ISLAMIC ASSISTANT
+========================
+
+Create a smart AI system like Islam360 with these features:
+
+- User asks any Islamic question
+- AI answers based on:
+  - Quran
+  - Hadith
+  - Authentic Islamic sources
+
+Must include:
+
+✔ Detect:
+- Sahih Hadith
+- Daif Hadith
+
+✔ Respond:
+- If something is wrong → clearly say "This is incorrect"
+- If correct → explain properly
+
+✔ Topics:
+- Aqeedah
+- Fiqh
+- Bid'ah (e.g. Milad)
+- Daily مسائل
+
+✔ Source-based answers (very important)
+
+========================
+4. COURSES + BOOKS LINKING
+========================
+
+Inside each course:
+
+- Show related books
+- Admin only inputs link
+- System auto-fetches and displays
+
+========================
+5. ADMIN PANEL CONTROL
+========================
+
+Admin can manage:
+
+- PDFs (upload or link)
+- Books
+- Scholars
+- AI content sources
+- Classes & course books
+
+========================
+6. UI REQUIREMENTS
+========================
+
+- Islamic green theme
+- Urdu language
+- Clean layout
+- Mobile responsive
+
+========================
+IMPORTANT:
+========================
+
+- Do NOT break existing LMS features
+- Add all new features cleanly
+- Optimize performance
+- No errors
+
+After completion, confirm:
+
+"ISLAMIC SUPER PLATFORM READY"

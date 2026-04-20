@@ -1,0 +1,1607 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Islamic LMS API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: users
+    description: User management
+  - name: students
+    description: Student operations
+  - name: teachers
+    description: Teacher operations
+  - name: courses
+    description: Course management
+  - name: lessons
+    description: Lesson management
+  - name: hadith
+    description: Hadith management
+  - name: classes
+    description: Live class management
+  - name: qna
+    description: Q&A communication
+  - name: dashboard
+    description: Dashboard summaries
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  # AUTH
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "204":
+          description: Logged out
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+
+  # USERS
+  /users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: List all users
+      parameters:
+        - in: query
+          name: role
+          schema:
+            type: string
+        - in: query
+          name: gender
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Create a user (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserBody"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /users/{id}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: Get user by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Update user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+    delete:
+      operationId: deleteUser
+      tags: [users]
+      summary: Delete user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /users/{id}/verify:
+    patch:
+      operationId: verifyStudent
+      tags: [users]
+      summary: Verify a student and assign federation code
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyStudentBody"
+      responses:
+        "200":
+          description: Student verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # COURSES
+  /courses:
+    get:
+      operationId: listCourses
+      tags: [courses]
+      summary: List all courses
+      parameters:
+        - in: query
+          name: type
+          schema:
+            type: string
+        - in: query
+          name: level
+          schema:
+            type: integer
+        - in: query
+          name: gender
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+
+    post:
+      operationId: createCourse
+      tags: [courses]
+      summary: Create a course
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCourseBody"
+      responses:
+        "201":
+          description: Course created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+  /courses/{id}:
+    get:
+      operationId: getCourse
+      tags: [courses]
+      summary: Get course by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateCourse
+      tags: [courses]
+      summary: Update course
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCourseBody"
+      responses:
+        "200":
+          description: Updated course
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+
+    delete:
+      operationId: deleteCourse
+      tags: [courses]
+      summary: Delete course
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # LESSONS
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List lessons
+      parameters:
+        - in: query
+          name: courseId
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+
+    post:
+      operationId: createLesson
+      tags: [lessons]
+      summary: Create a lesson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLessonBody"
+      responses:
+        "201":
+          description: Lesson created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+  /lessons/{id}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get lesson by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateLesson
+      tags: [lessons]
+      summary: Update lesson
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLessonBody"
+      responses:
+        "200":
+          description: Updated lesson
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Lesson"
+
+    delete:
+      operationId: deleteLesson
+      tags: [lessons]
+      summary: Delete lesson
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # HADITH
+  /hadiths:
+    get:
+      operationId: listHadiths
+      tags: [hadith]
+      summary: List hadiths
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: courseId
+          schema:
+            type: integer
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of hadiths
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Hadith"
+
+    post:
+      operationId: createHadith
+      tags: [hadith]
+      summary: Create a hadith
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHadithBody"
+      responses:
+        "201":
+          description: Hadith created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hadith"
+
+  /hadiths/{id}:
+    get:
+      operationId: getHadith
+      tags: [hadith]
+      summary: Get hadith by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Hadith
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hadith"
+
+    patch:
+      operationId: updateHadith
+      tags: [hadith]
+      summary: Update hadith
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateHadithBody"
+      responses:
+        "200":
+          description: Updated hadith
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Hadith"
+
+    delete:
+      operationId: deleteHadith
+      tags: [hadith]
+      summary: Delete hadith
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # LIVE CLASSES
+  /classes:
+    get:
+      operationId: listClasses
+      tags: [classes]
+      summary: List live classes
+      parameters:
+        - in: query
+          name: courseId
+          schema:
+            type: integer
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: gender
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of live classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LiveClass"
+
+    post:
+      operationId: createClass
+      tags: [classes]
+      summary: Schedule a live class
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClassBody"
+      responses:
+        "201":
+          description: Class scheduled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveClass"
+
+  /classes/{id}:
+    get:
+      operationId: getClass
+      tags: [classes]
+      summary: Get class by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Live class
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveClass"
+        "404":
+          description: Not found
+
+    patch:
+      operationId: updateClass
+      tags: [classes]
+      summary: Update class
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClassBody"
+      responses:
+        "200":
+          description: Updated class
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiveClass"
+
+    delete:
+      operationId: deleteClass
+      tags: [classes]
+      summary: Delete class
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # Q&A
+  /qna:
+    get:
+      operationId: listQna
+      tags: [qna]
+      summary: List Q&A entries
+      parameters:
+        - in: query
+          name: courseId
+          schema:
+            type: integer
+        - in: query
+          name: studentId
+          schema:
+            type: integer
+        - in: query
+          name: status
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of Q&A entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QnaEntry"
+
+    post:
+      operationId: createQna
+      tags: [qna]
+      summary: Ask a question
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateQnaBody"
+      responses:
+        "201":
+          description: Question submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QnaEntry"
+
+  /qna/{id}:
+    get:
+      operationId: getQna
+      tags: [qna]
+      summary: Get Q&A entry by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Q&A entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QnaEntry"
+
+  /qna/{id}/answer:
+    patch:
+      operationId: answerQna
+      tags: [qna]
+      summary: Teacher answers a question
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerQnaBody"
+      responses:
+        "200":
+          description: Answer submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QnaEntry"
+
+  # DASHBOARD
+  # PAYMENTS
+  /payments:
+    get:
+      operationId: listPayments
+      tags: [dashboard]
+      summary: List all payments
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: integer
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: method
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Payment"
+
+    post:
+      operationId: createPayment
+      tags: [dashboard]
+      summary: Record a payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePaymentBody"
+      responses:
+        "201":
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  /payments/{id}:
+    get:
+      operationId: getPayment
+      tags: [dashboard]
+      summary: Get payment by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+    patch:
+      operationId: updatePayment
+      tags: [dashboard]
+      summary: Update payment status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePaymentBody"
+      responses:
+        "200":
+          description: Updated payment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+  /dashboard/admin-stats:
+    get:
+      operationId: getAdminStats
+      tags: [dashboard]
+      summary: Get admin-level stats including revenue and trial info
+      responses:
+        "200":
+          description: Admin stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/enrollment-breakdown:
+    get:
+      operationId: getEnrollmentBreakdown
+      tags: [dashboard]
+      summary: Get enrollment breakdown by section and level
+      responses:
+        "200":
+          description: Enrollment breakdown
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EnrollmentBreakdown"
+
+  /dashboard/upcoming-classes:
+    get:
+      operationId: getUpcomingClasses
+      tags: [dashboard]
+      summary: Get upcoming scheduled classes
+      responses:
+        "200":
+          description: Upcoming classes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LiveClass"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required:
+        - user
+        - token
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        fullName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, teacher, female_teacher, qari, male_student, female_student]
+        gender:
+          type: string
+          enum: [male, female]
+        section:
+          type: ["string", "null"]
+          enum: [boys, girls, null]
+        level:
+          type: ["integer", "null"]
+        status:
+          type: string
+          enum: [pending, verified, suspended, trial, active]
+        federationCode:
+          type: ["string", "null"]
+        cnicNumber:
+          type: ["string", "null"]
+        trialStartDate:
+          type: ["string", "null"]
+        trialEndDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - fullName
+        - email
+        - role
+        - gender
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateUserBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [admin, teacher, female_teacher, qari, male_student, female_student]
+        gender:
+          type: string
+          enum: [male, female]
+        section:
+          type: ["string", "null"]
+          enum: [boys, girls, null]
+        level:
+          type: ["integer", "null"]
+        cnicNumber:
+          type: ["string", "null"]
+      required:
+        - fullName
+        - email
+        - password
+        - role
+        - gender
+
+    UpdateUserBody:
+      type: object
+      properties:
+        fullName:
+          type: string
+        phone:
+          type: ["string", "null"]
+        level:
+          type: ["integer", "null"]
+        section:
+          type: ["string", "null"]
+          enum: [boys, girls, null]
+        status:
+          type: string
+          enum: [pending, verified, suspended, trial, active]
+
+    VerifyStudentBody:
+      type: object
+      properties:
+        federationCode:
+          type: string
+        status:
+          type: string
+          enum: [verified, active]
+      required:
+        - federationCode
+        - status
+
+    Course:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          enum: [quran_nazra, tajweed, hifz, fiqh, hadith, islamic_studies]
+        description:
+          type: ["string", "null"]
+        level:
+          type: ["integer", "null"]
+        gender:
+          type: string
+          enum: [male, female, both]
+        teacherId:
+          type: ["integer", "null"]
+        lessonCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - type
+        - gender
+        - lessonCount
+        - createdAt
+        - updatedAt
+
+    CreateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum: [quran_nazra, tajweed, hifz, fiqh, hadith, islamic_studies]
+        description:
+          type: ["string", "null"]
+        level:
+          type: ["integer", "null"]
+        gender:
+          type: string
+          enum: [male, female, both]
+        teacherId:
+          type: ["integer", "null"]
+      required:
+        - title
+        - type
+        - gender
+
+    UpdateCourseBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        level:
+          type: ["integer", "null"]
+        gender:
+          type: string
+          enum: [male, female, both]
+        teacherId:
+          type: ["integer", "null"]
+
+    Lesson:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        pdfUrl:
+          type: ["string", "null"]
+        isPrivate:
+          type: boolean
+        orderIndex:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - courseId
+        - title
+        - isPrivate
+        - orderIndex
+        - createdAt
+        - updatedAt
+
+    CreateLessonBody:
+      type: object
+      properties:
+        courseId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        pdfUrl:
+          type: ["string", "null"]
+        isPrivate:
+          type: boolean
+        orderIndex:
+          type: integer
+      required:
+        - courseId
+        - title
+        - isPrivate
+        - orderIndex
+
+    UpdateLessonBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: ["string", "null"]
+        videoUrl:
+          type: ["string", "null"]
+        pdfUrl:
+          type: ["string", "null"]
+        isPrivate:
+          type: boolean
+        orderIndex:
+          type: integer
+
+    Hadith:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: ["integer", "null"]
+        arabicText:
+          type: string
+        urduTranslation:
+          type: ["string", "null"]
+        englishTranslation:
+          type: ["string", "null"]
+        narrator:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [sahih, daif, hasan]
+        keywords:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - arabicText
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateHadithBody:
+      type: object
+      properties:
+        courseId:
+          type: ["integer", "null"]
+        arabicText:
+          type: string
+        urduTranslation:
+          type: ["string", "null"]
+        englishTranslation:
+          type: ["string", "null"]
+        narrator:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [sahih, daif, hasan]
+        keywords:
+          type: ["string", "null"]
+      required:
+        - arabicText
+        - status
+
+    UpdateHadithBody:
+      type: object
+      properties:
+        arabicText:
+          type: string
+        urduTranslation:
+          type: ["string", "null"]
+        englishTranslation:
+          type: ["string", "null"]
+        narrator:
+          type: ["string", "null"]
+        source:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [sahih, daif, hasan]
+        keywords:
+          type: ["string", "null"]
+
+    LiveClass:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: integer
+        title:
+          type: string
+        teacherId:
+          type: integer
+        zoomLink:
+          type: ["string", "null"]
+        zoomMeetingId:
+          type: ["string", "null"]
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, live, completed, cancelled]
+        gender:
+          type: string
+          enum: [male, female, both]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - courseId
+        - title
+        - teacherId
+        - scheduledAt
+        - durationMinutes
+        - status
+        - gender
+        - createdAt
+        - updatedAt
+
+    CreateClassBody:
+      type: object
+      properties:
+        courseId:
+          type: integer
+        title:
+          type: string
+        teacherId:
+          type: integer
+        zoomLink:
+          type: ["string", "null"]
+        zoomMeetingId:
+          type: ["string", "null"]
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        gender:
+          type: string
+          enum: [male, female, both]
+      required:
+        - courseId
+        - title
+        - teacherId
+        - scheduledAt
+        - durationMinutes
+        - gender
+
+    UpdateClassBody:
+      type: object
+      properties:
+        title:
+          type: string
+        zoomLink:
+          type: ["string", "null"]
+        zoomMeetingId:
+          type: ["string", "null"]
+        scheduledAt:
+          type: string
+        durationMinutes:
+          type: integer
+        status:
+          type: string
+          enum: [scheduled, live, completed, cancelled]
+
+    QnaEntry:
+      type: object
+      properties:
+        id:
+          type: integer
+        courseId:
+          type: ["integer", "null"]
+        studentId:
+          type: integer
+        teacherId:
+          type: ["integer", "null"]
+        question:
+          type: string
+        answer:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, answered]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - studentId
+        - question
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateQnaBody:
+      type: object
+      properties:
+        courseId:
+          type: ["integer", "null"]
+        studentId:
+          type: integer
+        question:
+          type: string
+      required:
+        - studentId
+        - question
+
+    AnswerQnaBody:
+      type: object
+      properties:
+        teacherId:
+          type: integer
+        answer:
+          type: string
+      required:
+        - teacherId
+        - answer
+
+    DashboardStats:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        boysCount:
+          type: integer
+        girlsCount:
+          type: integer
+        totalTeachers:
+          type: integer
+        totalCourses:
+          type: integer
+        activeCourses:
+          type: integer
+        pendingVerifications:
+          type: integer
+        upcomingClassesCount:
+          type: integer
+        totalLessons:
+          type: integer
+        totalHadiths:
+          type: integer
+        pendingQuestions:
+          type: integer
+        trialStudents:
+          type: integer
+      required:
+        - totalStudents
+        - boysCount
+        - girlsCount
+        - totalTeachers
+        - totalCourses
+        - activeCourses
+        - pendingVerifications
+        - upcomingClassesCount
+        - totalLessons
+        - totalHadiths
+        - pendingQuestions
+        - trialStudents
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [student_registered, student_verified, class_scheduled, lesson_added, question_asked, question_answered, hadith_added]
+        description:
+          type: string
+        actorName:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - type
+        - description
+        - actorName
+        - createdAt
+
+    EnrollmentBreakdown:
+      type: object
+      properties:
+        bySection:
+          type: array
+          items:
+            type: object
+            properties:
+              section:
+                type: string
+              count:
+                type: integer
+            required:
+              - section
+              - count
+        byLevel:
+          type: array
+          items:
+            type: object
+            properties:
+              level:
+                type: integer
+              boysCount:
+                type: integer
+              girlsCount:
+                type: integer
+            required:
+              - level
+              - boysCount
+              - girlsCount
+        byCourse:
+          type: array
+          items:
+            type: object
+            properties:
+              courseType:
+                type: string
+              count:
+                type: integer
+            required:
+              - courseType
+              - count
+      required:
+        - bySection
+        - byLevel
+        - byCourse
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+          enum: [easypaisa, jazzcash, stripe, manual]
+        status:
+          type: string
+          enum: [pending, approved, rejected, refunded]
+        transactionId:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - userId
+        - amount
+        - currency
+        - method
+        - status
+        - createdAt
+        - updatedAt
+
+    CreatePaymentBody:
+      type: object
+      properties:
+        userId:
+          type: integer
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+          enum: [easypaisa, jazzcash, stripe, manual]
+        transactionId:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+      required:
+        - userId
+        - amount
+        - currency
+        - method
+
+    UpdatePaymentBody:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, approved, rejected, refunded]
+        transactionId:
+          type: ["string", "null"]
+        notes:
+          type: ["string", "null"]
+        paidAt:
+          type: ["string", "null"]
+
+    AdminStats:
+      type: object
+      properties:
+        totalRevenue:
+          type: number
+        monthlyRevenue:
+          type: number
+        pendingPayments:
+          type: integer
+        approvedPayments:
+          type: integer
+        trialUsers:
+          type: integer
+        paidUsers:
+          type: integer
+        expiredTrials:
+          type: integer
+        recentRegistrations:
+          type: integer
+      required:
+        - totalRevenue
+        - monthlyRevenue
+        - pendingPayments
+        - approvedPayments
+        - trialUsers
+        - paidUsers
+        - expiredTrials
+        - recentRegistrations

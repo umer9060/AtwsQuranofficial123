@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Islamic LMS - Quran Academy"
+version = "1.0.0"
+id = "artifacts/islamic-lms"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20307
+
+[services.development]
+run = "pnpm --filter @workspace/islamic-lms run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/islamic-lms", "run", "build" ]
+publicDir = "artifacts/islamic-lms/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20307"
+BASE_PATH = "/"
