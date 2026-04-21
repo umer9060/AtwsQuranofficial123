@@ -1,114 +1,197 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
-import { ArrowLeft, Maximize2, Minimize2, ExternalLink, BookOpen, Search } from "lucide-react";
+import { ArrowLeft, Maximize2, Minimize2, ExternalLink, BookOpen, Search, RefreshCw } from "lucide-react";
 
-function useQuery() {
-  if (typeof window === "undefined") return new URLSearchParams();
-  return new URLSearchParams(window.location.search);
+/** Google Drive یا عام URLs کو embed-friendly بناتا ہے */
+function toEmbedUrl(url: string): string {
+  if (!url) return "";
+
+  // Google Drive: /view یا /edit → /preview
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?]+)/);
+  if (driveMatch) {
+    return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+  }
+
+  // Google Drive uc?id format
+  const ucMatch = url.match(/drive\.google\.com\/uc\?.*id=([^&]+)/);
+  if (ucMatch) {
+    return `https://drive.google.com/file/d/${ucMatch[1]}/preview`;
+  }
+
+  // PDF files → Google Docs viewer
+  if (url.toLowerCase().endsWith(".pdf")) {
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+  }
+
+  return url;
+}
+
+/** toDriveDownload — Google Drive ڈاؤن لوڈ URL */
+function toDriveDownload(url: string): string {
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/?]+)/);
+  if (driveMatch) {
+    return `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`;
+  }
+  return url;
 }
 
 export default function Reader() {
-  const query = useQuery();
-  const title = query.get("title") || "کتاب";
-  const titleAr = query.get("ar") || title;
-  const rawUrl = query.get("url") || "";
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
+  const params = new URLSearchParams(window.location.search);
+  const title = params.get("title") || "کتاب";
+  const titleAr = params.get("ar") || title;
+  const rawUrl = params.get("url") || "";
 
-  const archiveSearch = `https://archive.org/search?query=${encodeURIComponent(titleAr || title)}&and[]=mediatype%3A"texts"`;
-  const embedUrl = rawUrl
-    ? rawUrl.endsWith(".pdf")
-      ? `https://docs.google.com/viewer?url=${encodeURIComponent(rawUrl)}&embedded=true`
-      : rawUrl
-    : archiveSearch;
+  const embedUrl = rawUrl ? toEmbedUrl(rawUrl) : "";
+  const downloadUrl = rawUrl ? toDriveDownload(rawUrl) : "";
+  const archiveSearch = `https://archive.org/search?query=${encodeURIComponent(titleAr)}&and[]=mediatype%3A"texts"`;
+
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [iframeKey, setIframeKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     document.title = `${titleAr} — مکتبہ آن لائن`;
   }, [titleAr]);
 
+  // فل اسکرین toggle — Escape key سے بند ہو
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsFullscreen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const containerClass = isFullscreen
+    ? "fixed inset-0 z-50 flex flex-col bg-gray-950"
+    : "min-h-screen flex flex-col bg-gray-950";
+
   return (
-    <div className={`flex flex-col bg-gray-950 text-white ${isFullscreen ? "fixed inset-0 z-50" : "min-h-screen"}`}>
-      {/* Top Bar */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-900 border-b border-gray-800 gap-3 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <Link href="/library">
-            <button className="flex items-center gap-1.5 text-green-400 hover:text-green-300 transition-colors text-sm shrink-0">
-              <ArrowLeft className="w-4 h-4" />
-              <span className="hidden sm:inline">مکتبہ کتاب</span>
-            </button>
-          </Link>
-          <div className="w-px h-5 bg-gray-700 shrink-0" />
-          <div className="flex items-center gap-2 min-w-0">
-            <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate" dir="rtl">{titleAr}</p>
-              {title !== titleAr && <p className="text-xs text-gray-400 truncate">{title}</p>}
-            </div>
+    <div className={containerClass}>
+      {/* ── Top Bar ── */}
+      <header className="flex items-center gap-3 px-4 py-2.5 bg-gray-900 border-b border-gray-800 shrink-0 min-w-0">
+        {/* Back */}
+        <Link href="/library">
+          <button className="flex items-center gap-1.5 text-green-400 hover:text-green-300 transition-colors text-sm whitespace-nowrap">
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">مکتبہ</span>
+          </button>
+        </Link>
+
+        <div className="w-px h-5 bg-gray-700 shrink-0" />
+
+        {/* Book info */}
+        <div className="flex items-center gap-2 min-w-0 flex-1">
+          <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-white truncate leading-tight" dir="rtl">{titleAr}</p>
+            {title !== titleAr && <p className="text-xs text-gray-400 truncate">{title}</p>}
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+
+        {/* Action buttons */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Reload */}
+          <button
+            onClick={() => setIframeKey(k => k + 1)}
+            title="دوبارہ لوڈ کریں"
+            className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Archive.org search */}
           <a
             href={archiveSearch}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white transition-colors"
+            title="Archive.org پر تلاش کریں"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-medium transition-colors"
           >
             <Search className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Archive.org</span>
+            <span className="hidden sm:inline">Archive</span>
           </a>
-          {rawUrl && (
+
+          {/* Download / Open externally */}
+          {downloadUrl && (
             <a
-              href={rawUrl}
+              href={downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-green-700 hover:bg-green-600 text-white transition-colors"
+              title="PDF ڈاؤن لوڈ"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-green-700 hover:bg-green-600 text-white text-xs font-medium transition-colors"
             >
               <ExternalLink className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">نئی Tab</span>
+              <span className="hidden sm:inline">PDF</span>
             </a>
           )}
+
+          {/* Fullscreen toggle */}
           <button
             onClick={() => setIsFullscreen(f => !f)}
-            className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors"
+            title={isFullscreen ? "چھوٹا کریں (Esc)" : "فل اسکرین"}
+            className="p-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-colors"
           >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Iframe Viewer */}
-      <div className="flex-1 relative bg-gray-900">
-        {!loaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-gray-950 z-10">
-            <div className="w-12 h-12 rounded-full border-4 border-green-500 border-t-transparent animate-spin" />
-            <p className="text-gray-400 text-sm" dir="rtl">کتاب لوڈ ہو رہی ہے...</p>
+      {/* ── Viewer ── */}
+      <main className="flex-1 relative bg-gray-900">
+        {embedUrl ? (
+          <iframe
+            ref={iframeRef}
+            key={iframeKey}
+            src={embedUrl}
+            className="absolute inset-0 w-full h-full border-0"
+            allow="fullscreen autoplay"
+            title={titleAr}
+          />
+        ) : (
+          /* No URL — archive.org search */
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 p-6 text-center">
+            <div className="w-20 h-20 rounded-full bg-amber-500/10 flex items-center justify-center">
+              <BookOpen className="w-10 h-10 text-amber-400" />
+            </div>
+            <div dir="rtl">
+              <p className="text-white text-xl font-bold mb-2">{titleAr}</p>
+              <p className="text-gray-400 text-sm mb-6">یہ کتاب ابھی آن لائن دستیاب نہیں — عنقریب شامل کی جائے گی</p>
+              <a
+                href={archiveSearch}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-medium transition-colors"
+              >
+                <Search className="w-4 h-4" />
+                Archive.org پر تلاش کریں
+              </a>
+            </div>
           </div>
         )}
-        <iframe
-          src={embedUrl}
-          className="w-full h-full border-0"
-          style={{ minHeight: isFullscreen ? "100vh" : "calc(100vh - 52px)" }}
-          onLoad={() => setLoaded(true)}
-          allow="fullscreen"
-          title={titleAr}
-        />
-      </div>
+      </main>
 
-      {/* Bottom hint */}
-      {!isFullscreen && (
-        <div className="bg-gray-900 border-t border-gray-800 px-4 py-2 text-center" dir="rtl">
-          <p className="text-xs text-gray-500">
-            اگر کتاب نظر نہ آئے تو{" "}
+      {/* ── Bottom hint (non-fullscreen only) ── */}
+      {!isFullscreen && embedUrl && (
+        <footer className="bg-gray-900 border-t border-gray-800 px-4 py-2 text-center shrink-0">
+          <p className="text-xs text-gray-500" dir="rtl">
+            کتاب نظر نہ آئے؟{" "}
+            <button
+              onClick={() => setIframeKey(k => k + 1)}
+              className="text-green-400 hover:underline"
+            >
+              دوبارہ لوڈ کریں
+            </button>
+            {" "}یا{" "}
             <a href={archiveSearch} target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">
               Archive.org پر تلاش کریں
             </a>
-            {" "}یا{" "}
-            <button onClick={() => setIsFullscreen(true)} className="text-green-400 hover:underline">
-              فل اسکرین
+            {" "}·{" "}
+            <button onClick={() => setIsFullscreen(true)} className="text-blue-400 hover:underline">
+              فل اسکرین (Esc سے بند)
             </button>
-            {" "}میں دیکھیں
           </p>
-        </div>
+        </footer>
       )}
     </div>
   );

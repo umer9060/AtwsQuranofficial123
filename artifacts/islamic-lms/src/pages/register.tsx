@@ -297,8 +297,7 @@ export default function Register() {
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {enrollType === "self" && (
+                {enrollType === "self" && (
                   <div className="space-y-2">
                     <Label htmlFor="age">Age <span className="text-red-500">*</span></Label>
                     <Input
@@ -316,19 +315,20 @@ export default function Register() {
                       </Badge>
                     )}
                   </div>
-                  )}
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label>Gender <span className="text-red-500">*</span></Label>
+                    <Label>{enrollType === "parent" ? "جنس (بچے کی)" : "Gender"} <span className="text-red-500">*</span></Label>
                     <Select value={gender} onValueChange={(v: "male" | "female") => setGender(v)}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="male">Male (Boys Section)</SelectItem>
-                        <SelectItem value="female">Female (Girls Section)</SelectItem>
+                        <SelectItem value="male">{enrollType === "parent" ? "لڑکا (بنین)" : "Male (Boys Section)"}</SelectItem>
+                        <SelectItem value="female">{enrollType === "parent" ? "لڑکی (بنات)" : "Female (Girls Section)"}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>Current Class <span className="text-red-500">*</span></Label>
+                    <Label>درجہ / Current Class <span className="text-red-500">*</span></Label>
                     <Select value={currentClass} onValueChange={setCurrentClass}>
                       <SelectTrigger><SelectValue placeholder="Select class" /></SelectTrigger>
                       <SelectContent>

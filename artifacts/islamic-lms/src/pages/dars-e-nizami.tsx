@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BookOpen, Search, GraduationCap, Filter, Download, Eye, BookMarked, Library } from "lucide-react";
 import { Link } from "wouter";
+import { getBookLinks } from "@/lib/book-links";
 
 function useMeta(title: string, description: string) {
   useEffect(() => {
@@ -580,10 +581,16 @@ function DarjaCard({ darja, section }: { darja: Darja & { filteredBooks: Book[];
 
 function BookCard({ book, index, type }: { book: Book; index: number; type: "asal" | "sharhat" }) {
   const isAsal = type === "asal";
+
+  // book-links.ts سے لنک لیں — وہاں Google Drive لنکس شامل کریں
+  const stored = getBookLinks(book.nameAr);
+  const pdfUrl = stored.pdfUrl ?? book.pdfUrl;
+  const viewUrl = stored.viewUrl ?? book.viewUrl;
+
   const bookSearch = encodeURIComponent(book.nameAr || book.name);
-  const archivePdfUrl = book.pdfUrl ?? `https://archive.org/search?query=${bookSearch}&and[]=mediatype%3A"texts"`;
-  const readerUrl = book.viewUrl
-    ? `/reader?title=${encodeURIComponent(book.name)}&ar=${encodeURIComponent(book.nameAr || book.name)}&url=${encodeURIComponent(book.viewUrl)}`
+  const archivePdfUrl = pdfUrl ?? `https://archive.org/search?query=${bookSearch}&and[]=mediatype%3A"texts"`;
+  const readerUrl = viewUrl
+    ? `/reader?title=${encodeURIComponent(book.name)}&ar=${encodeURIComponent(book.nameAr || book.name)}&url=${encodeURIComponent(viewUrl)}`
     : `/reader?title=${encodeURIComponent(book.name)}&ar=${encodeURIComponent(book.nameAr || book.name)}`;
 
   return (
