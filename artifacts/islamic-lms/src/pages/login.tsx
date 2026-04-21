@@ -7,10 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { BookOpen } from "lucide-react";
+import { BookOpen, GraduationCap, Users } from "lucide-react";
+
+type Tab = "general" | "girls";
 
 export default function Login() {
+  const [tab, setTab] = useState<Tab>("general");
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { refetchUser } = useAuth();
   const loginMutation = useLogin();
@@ -19,8 +23,9 @@ export default function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const credential = tab === "girls" ? username : email;
     loginMutation.mutate(
-      { data: { email, password } },
+      { data: { email: credential, password } },
       {
         onSuccess: (data) => {
           if (data?.token) {
@@ -31,8 +36,8 @@ export default function Login() {
         },
         onError: (err) => {
           toast({
-            title: "Login failed",
-            description: err.message || "Invalid credentials",
+            title: "لاگ ان ناکام",
+            description: err.message || "غلط شناخت یا پاس ورڈ",
             variant: "destructive",
           });
         },
@@ -47,60 +52,137 @@ export default function Login() {
           <BookOpen className="w-8 h-8" />
         </div>
         <h1 className="text-4xl font-serif font-bold text-primary">AtwsQuranofficial</h1>
-        <p className="text-muted-foreground mt-2">Islamic Learning Management System</p>
+        <p className="text-muted-foreground mt-2">اسلامی تعلیمی نظام — Islamic LMS</p>
       </div>
 
       <div className="mb-4 text-center">
         <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-          ← Back to Website
+          ← واپس ہوم پیج
         </Link>
       </div>
-      <Card className="w-full max-w-md shadow-xl border-primary/10">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
-          <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m.student@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-4">
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loginMutation.isPending}
-            >
-              {loginMutation.isPending ? "Logging in..." : "Log in"}
-            </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              Don't have an account?{" "}
-              <Link href="/register" className="text-primary hover:underline font-medium">
-                Register here
-              </Link>
-            </div>
-          </CardFooter>
-        </form>
-      </Card>
+
+      <div className="w-full max-w-md">
+        {/* Tab selector */}
+        <div className="flex rounded-xl overflow-hidden border border-primary/20 mb-4 bg-white shadow-sm">
+          <button
+            onClick={() => setTab("general")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+              tab === "general"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            طلبہ / اساتذہ
+          </button>
+          <button
+            onClick={() => setTab("girls")}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+              tab === "girls"
+                ? "bg-pink-600 text-white"
+                : "text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            <GraduationCap className="w-4 h-4" />
+            طالبات لاگ ان
+          </button>
+        </div>
+
+        <Card className="shadow-xl border-primary/10">
+          <CardHeader className="space-y-1">
+            {tab === "general" ? (
+              <>
+                <CardTitle className="text-2xl text-center">خوش آمدید</CardTitle>
+                <CardDescription className="text-center" dir="rtl">
+                  اپنا ای میل اور پاس ورڈ لکھیں
+                </CardDescription>
+              </>
+            ) : (
+              <>
+                <CardTitle className="text-2xl text-center text-pink-700">طالبات لاگ ان</CardTitle>
+                <CardDescription className="text-center" dir="rtl">
+                  اپنا یوزرنیم یا ای میل اور پاس ورڈ لکھیں
+                </CardDescription>
+              </>
+            )}
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              {tab === "general" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="email">ای میل (Gmail)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@gmail.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    dir="ltr"
+                  />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="username" dir="rtl">یوزرنیم یا ای میل</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="یوزرنیم یا ای میل لکھیں"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    required
+                    dir="ltr"
+                  />
+                </div>
+              )}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password">پاس ورڈ</Label>
+                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                    پاس ورڈ بھول گئے؟
+                  </Link>
+                </div>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                />
+              </div>
+
+              {tab === "girls" && (
+                <div className="bg-pink-50 border border-pink-200 rounded-lg p-3 text-xs text-pink-700" dir="rtl">
+                  <p>🌸 طالبات: اگر پہلی بار آ رہی ہیں تو پہلے ایڈمن سے رابطہ کریں اور اپنا یوزرنیم حاصل کریں۔</p>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4">
+              <Button
+                type="submit"
+                className={`w-full ${tab === "girls" ? "bg-pink-600 hover:bg-pink-700" : ""}`}
+                disabled={loginMutation.isPending}
+              >
+                {loginMutation.isPending ? "لاگ ان ہو رہا ہے..." : "لاگ ان کریں"}
+              </Button>
+              <p className="text-sm text-center text-muted-foreground" dir="rtl">
+                نئے طالب علم؟{" "}
+                <Link href="/register" className="text-primary hover:underline font-medium">
+                  یہاں داخلہ لیں
+                </Link>
+              </p>
+              <div className="text-xs text-center text-muted-foreground space-y-1" dir="rtl">
+                <p>بغیر لاگ ان کتابیں پڑھیں:{" "}
+                  <Link href="/library" className="text-primary hover:underline">مکتبہ کتاب</Link>
+                  {" "}·{" "}
+                  <Link href="/scholars" className="text-primary hover:underline">علماء کا کتب خانہ</Link>
+                </p>
+              </div>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }

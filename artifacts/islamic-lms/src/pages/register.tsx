@@ -3,17 +3,17 @@ import { useCreateUser } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useLocation } from "wouter";
-import { BookOpen, Upload, CheckCircle2, AlertCircle, User, FileText } from "lucide-react";
+import { BookOpen, Upload, CheckCircle2, AlertCircle, User, FileText, Users } from "lucide-react";
 
 const CLASSES = ["Noorani Qaida", "Quran Nazra", "Tajweed", "Hifz (Memorisation)", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8"];
 const EDUCATION_LEVELS = ["Primary (Class 1-5)", "Middle (Class 6-8)", "Matric / SSC", "Intermediate / FSc / FA", "Bachelor's Degree", "Master's Degree", "None / Not Applicable"];
 const CNIC_REGEX = /^\d{5}-\d{7}-\d{1}$/;
+type EnrollType = "self" | "parent";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -31,6 +31,7 @@ function validateCnic(value: string): boolean {
 type Step = "details" | "documents" | "review";
 
 export default function Register() {
+  const [enrollType, setEnrollType] = useState<EnrollType>("self");
   const [step, setStep] = useState<Step>("details");
 
   const [fullName, setFullName] = useState("");
@@ -39,6 +40,8 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [fatherName, setFatherName] = useState("");
+  const [motherName, setMotherName] = useState("");
+  const [dob, setDob] = useState("");
   const [age, setAge] = useState<number | "">("");
   const [gender, setGender] = useState<"male" | "female">("male");
   const [currentClass, setCurrentClass] = useState("");
@@ -175,6 +178,35 @@ export default function Register() {
       </div>
 
       <div className="w-full max-w-2xl">
+        {/* Enrollment type selector */}
+        <div className="flex rounded-xl overflow-hidden border border-primary/20 mb-4 bg-white shadow-sm">
+          <button
+            onClick={() => { setEnrollType("self"); setStep("details"); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+              enrollType === "self" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            <User className="w-4 h-4" />
+            خود داخلہ لے رہا ہوں
+          </button>
+          <button
+            onClick={() => { setEnrollType("parent"); setStep("details"); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-medium transition-colors ${
+              enrollType === "parent" ? "bg-amber-600 text-white" : "text-muted-foreground hover:bg-muted/50"
+            }`}
+          >
+            <Users className="w-4 h-4" />
+            بچے کا داخلہ (والدین)
+          </button>
+        </div>
+
+        {enrollType === "parent" && (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-4 text-sm" dir="rtl">
+            <p className="font-semibold text-amber-800 mb-1">والدین کا داخلہ فارم</p>
+            <p className="text-amber-700 text-xs">اپنے بچے/بچی کی تمام معلومات درج کریں۔ ای میل آپ (والدین) کا Gmail ہو۔ داخلے کے بعد ایڈمن آپ سے رابطہ کرے گا۔</p>
+          </div>
+        )}
+
         {/* Step indicator */}
         <div className="flex items-center mb-6 gap-2">
           {steps.map((s, i) => (
@@ -194,8 +226,15 @@ export default function Register() {
           {step === "details" && (
             <>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" /> Personal Information</CardTitle>
-                <CardDescription>Fill in your basic details for admission</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  {enrollType === "parent" ? "بچے کی ذاتی معلومات" : "Personal Information"}
+                </CardTitle>
+                <CardDescription dir="rtl">
+                  {enrollType === "parent"
+                    ? "بچے کی تمام معلومات درج کریں — ای میل اور پاس ورڈ آپ (والدین) کا ہوگا"
+                    : "Fill in your basic details for admission"}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -220,15 +259,46 @@ export default function Register() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password <span className="text-red-500">*</span></Label>
+                    <Label htmlFor="password">
+                      {enrollType === "parent" ? "پاس ورڈ (والدین کا)" : "Password"} <span className="text-red-500">*</span>
+                    </Label>
                     <Input id="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 6 characters" autoComplete="new-password" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="fatherName">Father / Mother Name <span className="text-red-500">*</span></Label>
-                    <Input id="fatherName" value={fatherName} onChange={e => setFatherName(e.target.value)} placeholder="Father or Mother's name" />
+                    <Label htmlFor="fatherName">
+                      {enrollType === "parent" ? "والد کا نام" : "Father / Mother Name"} <span className="text-red-500">*</span>
+                    </Label>
+                    <Input id="fatherName" value={fatherName} onChange={e => setFatherName(e.target.value)} placeholder={enrollType === "parent" ? "والد کا مکمل نام" : "Father or Mother's name"} />
                   </div>
                 </div>
+                {enrollType === "parent" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="motherName">والدہ کا نام <span className="text-red-500">*</span></Label>
+                      <Input id="motherName" value={motherName} onChange={e => setMotherName(e.target.value)} placeholder="والدہ کا مکمل نام" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dob">تاریخ پیدائش <span className="text-red-500">*</span></Label>
+                      <Input
+                        id="dob"
+                        type="date"
+                        value={dob}
+                        max={new Date().toISOString().split("T")[0]}
+                        onChange={e => {
+                          setDob(e.target.value);
+                          if (e.target.value) {
+                            const birth = new Date(e.target.value);
+                            const now = new Date();
+                            setAge(now.getFullYear() - birth.getFullYear());
+                          }
+                        }}
+                      />
+                      {ageNum > 0 && <Badge variant="secondary" className="text-xs">عمر: {ageNum} سال</Badge>}
+                    </div>
+                  </div>
+                )}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {enrollType === "self" && (
                   <div className="space-y-2">
                     <Label htmlFor="age">Age <span className="text-red-500">*</span></Label>
                     <Input
@@ -246,6 +316,7 @@ export default function Register() {
                       </Badge>
                     )}
                   </div>
+                  )}
                   <div className="space-y-2">
                     <Label>Gender <span className="text-red-500">*</span></Label>
                     <Select value={gender} onValueChange={(v: "male" | "female") => setGender(v)}>

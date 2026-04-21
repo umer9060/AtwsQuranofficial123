@@ -26,6 +26,8 @@ import Verification from "@/pages/verification";
 import GlobalSearch from "@/pages/search";
 import DarseNizami from "@/pages/dars-e-nizami";
 import Scholars from "@/pages/scholars";
+import Reader from "@/pages/reader";
+import ForgotPassword from "@/pages/forgot-password";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +40,8 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/library" component={DarseNizami} />
       <Route path="/scholars" component={Scholars} />
+      <Route path="/reader" component={Reader} />
+      <Route path="/forgot-password" component={ForgotPassword} />
 
       {/* Protected routes — require login */}
       <Route path="/dashboard" component={Dashboard} />

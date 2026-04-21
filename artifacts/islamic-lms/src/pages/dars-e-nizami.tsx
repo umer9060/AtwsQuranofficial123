@@ -580,6 +580,12 @@ function DarjaCard({ darja, section }: { darja: Darja & { filteredBooks: Book[];
 
 function BookCard({ book, index, type }: { book: Book; index: number; type: "asal" | "sharhat" }) {
   const isAsal = type === "asal";
+  const bookSearch = encodeURIComponent(book.nameAr || book.name);
+  const archivePdfUrl = book.pdfUrl ?? `https://archive.org/search?query=${bookSearch}&and[]=mediatype%3A"texts"`;
+  const readerUrl = book.viewUrl
+    ? `/reader?title=${encodeURIComponent(book.name)}&ar=${encodeURIComponent(book.nameAr || book.name)}&url=${encodeURIComponent(book.viewUrl)}`
+    : `/reader?title=${encodeURIComponent(book.name)}&ar=${encodeURIComponent(book.nameAr || book.name)}`;
+
   return (
     <div className={`flex items-start gap-3 px-3 py-3 rounded-xl border transition-all hover:shadow-sm ${
       isAsal ? "bg-white border-gray-100 hover:border-green-200" : "bg-amber-50/50 border-amber-100 hover:border-amber-300"
@@ -605,30 +611,23 @@ function BookCard({ book, index, type }: { book: Book; index: number; type: "asa
       </div>
       <div className="flex flex-col gap-1 shrink-0">
         <a
-          href={book.pdfUrl ?? "#"}
-          onClick={e => { if (!book.pdfUrl) e.preventDefault(); }}
-          title="PDF ڈاؤن لوڈ"
-          className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors ${
-            book.pdfUrl
-              ? "bg-green-600 text-white hover:bg-green-700"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
+          href={archivePdfUrl}
+          target={book.pdfUrl ? "_self" : "_blank"}
+          rel="noopener noreferrer"
+          download={!!book.pdfUrl}
+          title="PDF ڈاؤن لوڈ / تلاش"
+          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors bg-green-600 text-white hover:bg-green-700"
         >
           <Download className="w-3 h-3" />
           PDF
         </a>
         <a
-          href={book.viewUrl ?? "#"}
-          onClick={e => { if (!book.viewUrl) e.preventDefault(); }}
+          href={readerUrl}
           title="آن لائن پڑھیں"
-          className={`flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors ${
-            book.viewUrl
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-100 text-gray-400 cursor-not-allowed"
-          }`}
+          className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-md font-medium transition-colors bg-blue-600 text-white hover:bg-blue-700"
         >
           <Eye className="w-3 h-3" />
-          Read
+          پڑھیں
         </a>
       </div>
     </div>
