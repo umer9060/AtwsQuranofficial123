@@ -97,14 +97,22 @@ export default function Register() {
   };
 
   const validateStep1 = () => {
-    if (!fullName.trim()) { toast({ title: "Full name is required", variant: "destructive" }); return false; }
-    if (!email.trim()) { toast({ title: "Email is required", variant: "destructive" }); return false; }
-    if (!password || password.length < 6) { toast({ title: "Password must be at least 6 characters", variant: "destructive" }); return false; }
-    if (!phone.trim()) { toast({ title: "Phone number is required", variant: "destructive" }); return false; }
-    if (!fatherName.trim()) { toast({ title: "Father/Mother name is required", variant: "destructive" }); return false; }
-    if (!age || ageNum <= 0 || ageNum > 100) { toast({ title: "Please enter a valid age", variant: "destructive" }); return false; }
-    if (!currentClass) { toast({ title: "Please select your current class", variant: "destructive" }); return false; }
-    if (!lastEducation) { toast({ title: "Please select your last education level", variant: "destructive" }); return false; }
+    if (!fullName.trim()) { toast({ title: "Full name is required — پورا نام ضروری ہے", variant: "destructive" }); return false; }
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      toast({ title: "Valid email is required — صحیح ای میل ضروری ہے", variant: "destructive" }); return false;
+    }
+    if (!password || password.length < 6) { toast({ title: "Password must be at least 6 characters — پاسورڈ کم از کم 6 حروف", variant: "destructive" }); return false; }
+    if (!phone.trim()) { toast({ title: "Phone number is required — فون نمبر ضروری ہے", variant: "destructive" }); return false; }
+    // Pakistan phone: 03XXXXXXXXX or +923XXXXXXXXX
+    const phoneDigits = phone.replace(/[^\d]/g, "");
+    const validPhone = /^(?:92|0)?3\d{9}$/.test(phoneDigits);
+    if (!validPhone) {
+      toast({ title: "Invalid phone — غلط فون نمبر (03XXXXXXXXX)", variant: "destructive" }); return false;
+    }
+    if (!fatherName.trim()) { toast({ title: "Father/Mother name is required — والد/والدہ کا نام ضروری ہے", variant: "destructive" }); return false; }
+    if (!age || ageNum <= 0 || ageNum > 100) { toast({ title: "Please enter a valid age — صحیح عمر لکھیں", variant: "destructive" }); return false; }
+    if (!currentClass) { toast({ title: "Please select your current class — درجہ منتخب کریں", variant: "destructive" }); return false; }
+    if (!lastEducation) { toast({ title: "Please select your last education level — تعلیمی سطح منتخب کریں", variant: "destructive" }); return false; }
     return true;
   };
 

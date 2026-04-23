@@ -110,28 +110,33 @@ export default function Login() {
             <CardContent className="space-y-4">
               {tab === "general" ? (
                 <div className="space-y-2">
-                  <Label htmlFor="email">ای میل (Gmail)</Label>
+                  <Label htmlFor="email" dir="rtl">شناختی کارڈ / فون / ای میل</Label>
                   <Input
                     id="email"
-                    type="email"
-                    placeholder="name@gmail.com"
+                    type="text"
+                    placeholder="12345-1234567-1  یا  03001234567  یا  name@gmail.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     dir="ltr"
+                    autoComplete="username"
                   />
+                  <p className="text-xs text-muted-foreground" dir="rtl">
+                    تینوں میں سے کسی ایک سے لاگ ان کر سکتے ہیں
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="username" dir="rtl">یوزرنیم یا ای میل</Label>
+                  <Label htmlFor="username" dir="rtl">یوزرنیم / شناختی کارڈ / فون / ای میل</Label>
                   <Input
                     id="username"
                     type="text"
-                    placeholder="یوزرنیم یا ای میل لکھیں"
+                    placeholder="یوزرنیم، CNIC، فون یا ای میل"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
                     dir="ltr"
+                    autoComplete="username"
                   />
                 </div>
               )}

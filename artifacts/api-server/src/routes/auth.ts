@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, or } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import { db, usersTable } from "@workspace/db";
 import { LoginBody } from "@workspace/api-zod";
 
@@ -25,22 +26,51 @@ function toUserResponse(u: typeof usersTable.$inferSelect) {
   };
 }
 
+/**
+ * Verify password — supports both bcrypt and the legacy `hashed_<pw>` format
+ * (so users created before bcrypt was added can still log in).
+ */
+async function verifyPassword(plain: string, stored: string): Promise<boolean> {
+  if (stored.startsWith("$2")) {
+    return bcrypt.compare(plain, stored);
+  }
+  // Legacy format
+  return stored === `hashed_${plain}`;
+}
+
+/**
+ * POST /auth/login
+ * `email` field accepts: email | CNIC (12345-1234567-1) | phone (03XXXXXXXXX)
+ */
 router.post("/auth/login", async (req, res): Promise<void> => {
   const parsed = LoginBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
+    res.status(400).json({ error: "Invalid request — لاگ ان معلومات غلط ہیں" });
     return;
   }
 
-  const [user] = await db.select().from(usersTable).where(eq(usersTable.email, parsed.data.email));
+  const id = parsed.data.email.trim();
+
+  const [user] = await db
+    .select()
+    .from(usersTable)
+    .where(
+      or(
+        eq(usersTable.email, id.toLowerCase()),
+        eq(usersTable.cnicNumber, id),
+        eq(usersTable.phone, id),
+        eq(usersTable.username, id),
+      ),
+    );
+
   if (!user) {
-    res.status(401).json({ error: "Invalid credentials" });
+    res.status(401).json({ error: "Account not found — اکاؤنٹ موجود نہیں" });
     return;
   }
 
-  const expectedHash = `hashed_${parsed.data.password}`;
-  if (user.passwordHash !== expectedHash) {
-    res.status(401).json({ error: "Invalid credentials" });
+  const ok = await verifyPassword(parsed.data.password, user.passwordHash);
+  if (!ok) {
+    res.status(401).json({ error: "Password incorrect — پاسورڈ غلط ہے" });
     return;
   }
 

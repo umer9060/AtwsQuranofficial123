@@ -1,6 +1,19 @@
 import { Router, type IRouter } from "express";
 import { eq, or, ilike, and } from "drizzle-orm";
+import bcrypt from "bcryptjs";
 import { db, usersTable, activityLogTable } from "@workspace/db";
+
+// ─── Pakistan format validators ───
+const CNIC_RE = /^\d{5}-\d{7}-\d$/;          // 12345-1234567-1
+const PHONE_RE = /^(?:\+92|0)?3\d{9}$/;       // 03XXXXXXXXX or +923XXXXXXXXX
+
+function normalizePhone(p?: string | null): string | null {
+  if (!p) return null;
+  const digits = p.replace(/[^\d]/g, "");
+  if (digits.startsWith("92") && digits.length === 12) return "0" + digits.slice(2);
+  if (digits.length === 10 && digits.startsWith("3")) return "0" + digits;
+  return digits.startsWith("0") ? digits : null;
+}
 import {
   ListUsersQueryParams,
   CreateUserBody,
@@ -106,12 +119,55 @@ router.post("/users", async (req, res): Promise<void> => {
   }
 
   const { password, ...rest } = parsed.data;
+
+  // ─── Pakistan format validation ───
+  if (rest.cnicNumber && !CNIC_RE.test(rest.cnicNumber)) {
+    res.status(400).json({ error: "Invalid CNIC format — غلط شناختی کارڈ نمبر (12345-1234567-1)" });
+    return;
+  }
+
+  const phone = normalizePhone(rest.phone ?? null);
+  if (rest.phone && (!phone || !PHONE_RE.test(phone))) {
+    res.status(400).json({ error: "Invalid phone — غلط فون نمبر (03XXXXXXXXX)" });
+    return;
+  }
+
+  // ─── Uniqueness checks ───
+  const dupes = await db
+    .select({ id: usersTable.id, email: usersTable.email, cnic: usersTable.cnicNumber, phone: usersTable.phone })
+    .from(usersTable)
+    .where(
+      or(
+        eq(usersTable.email, rest.email.toLowerCase()),
+        rest.cnicNumber ? eq(usersTable.cnicNumber, rest.cnicNumber) : undefined,
+        phone ? eq(usersTable.phone, phone) : undefined,
+      ),
+    );
+
+  if (dupes.length) {
+    const d = dupes[0];
+    if (d.email === rest.email.toLowerCase()) {
+      res.status(409).json({ error: "Email already used — یہ ای میل پہلے سے رجسٹرڈ ہے" });
+      return;
+    }
+    if (rest.cnicNumber && d.cnic === rest.cnicNumber) {
+      res.status(409).json({ error: "CNIC already registered — یہ شناختی کارڈ پہلے سے رجسٹرڈ ہے" });
+      return;
+    }
+    if (phone && d.phone === phone) {
+      res.status(409).json({ error: "Phone already registered — یہ فون نمبر پہلے سے رجسٹرڈ ہے" });
+      return;
+    }
+  }
+
   const trialStart = new Date();
   const trialEnd = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   const [user] = await db.insert(usersTable).values({
     ...rest,
-    passwordHash: `hashed_${password}`,
+    email: rest.email.toLowerCase(),
+    phone,
+    passwordHash: await bcrypt.hash(password, 10),
     status: "trial",
     trialStartDate: trialStart,
     trialEndDate: trialEnd,
