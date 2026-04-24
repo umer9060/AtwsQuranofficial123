@@ -168,7 +168,7 @@ router.post("/users", async (req, res): Promise<void> => {
     email: rest.email.toLowerCase(),
     phone,
     passwordHash: await bcrypt.hash(password, 10),
-    status: "trial",
+    status: "pending",
     trialStartDate: trialStart,
     trialEndDate: trialEnd,
   }).returning();

@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const publicRoutes = ["/", "/login", "/register", "/library", "/scholars", "/reader", "/forgot-password"];
+    const publicRoutes = ["/", "/login", "/register", "/library", "/scholars", "/reader", "/forgot-password", "/pending-verification"];
     if (!isLoading && isError && !publicRoutes.includes(location)) {
       setLocation("/login");
     }

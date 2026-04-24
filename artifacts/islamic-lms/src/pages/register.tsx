@@ -153,12 +153,16 @@ export default function Register() {
         }
       },
       {
-        onSuccess: () => {
+        onSuccess: (newUser) => {
+          // Reset countdown for fresh review window
+          localStorage.removeItem("atws_pending_start");
           toast({
-            title: "Registration successful!",
-            description: "Your application is under review. You'll be notified after verification.",
+            title: "Registration successful! — رجسٹریشن کامیاب",
+            description: "Now complete the WhatsApp test for activation — اب واٹس ایپ پر ٹیسٹ مکمل کریں",
           });
-          setLocation("/login");
+          const role = newUser?.role?.includes("teacher") ? "teacher" : "student";
+          const name = encodeURIComponent(newUser?.fullName || fullName);
+          setLocation(`/pending-verification?name=${name}&role=${role}`);
         },
         onError: (err) => {
           toast({ title: "Registration failed", description: err.message || "An error occurred", variant: "destructive" });

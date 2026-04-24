@@ -74,6 +74,19 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
+  // ─── Block login until admin verifies ───
+  const ACTIVE = new Set(["active", "verified", "trial"]);
+  if (!ACTIVE.has(user.status)) {
+    if (user.status === "suspended") {
+      res.status(403).json({ error: "Account suspended — اکاؤنٹ معطل کر دیا گیا ہے" });
+      return;
+    }
+    res.status(403).json({
+      error: "Account not verified yet — اکاؤنٹ ابھی verify نہیں ہوا، براہ کرم پہلے ٹیسٹ مکمل کریں",
+    });
+    return;
+  }
+
   const token = Buffer.from(`${user.id}:${user.email}:${Date.now()}`).toString("base64");
 
   res.json({

@@ -28,6 +28,7 @@ import DarseNizami from "@/pages/dars-e-nizami";
 import Scholars from "@/pages/scholars";
 import Reader from "@/pages/reader";
 import ForgotPassword from "@/pages/forgot-password";
+import PendingVerification from "@/pages/pending-verification";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/scholars" component={Scholars} />
       <Route path="/reader" component={Reader} />
       <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/pending-verification" component={PendingVerification} />
 
       {/* Protected routes — require login */}
       <Route path="/dashboard" component={Dashboard} />

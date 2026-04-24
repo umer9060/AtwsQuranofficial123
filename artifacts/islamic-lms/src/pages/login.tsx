@@ -32,14 +32,24 @@ export default function Login() {
             localStorage.setItem("auth_token", data.token);
           }
           refetchUser();
-          setLocation("/dashboard");
+          // Role-based redirect
+          const role = data?.user?.role || "";
+          if (role === "admin") setLocation("/admin/users");
+          else if (role.includes("teacher") || role === "qari") setLocation("/teachers");
+          else setLocation("/dashboard");
         },
-        onError: (err) => {
+        onError: (err: any) => {
+          // Server returns 403 with bilingual message when account is pending
+          const msg = err?.message || "";
+          const isPending = /not verified|pending|ابھی verify/i.test(msg);
           toast({
-            title: "لاگ ان ناکام",
-            description: err.message || "غلط شناخت یا پاس ورڈ",
+            title: isPending ? "اکاؤنٹ ابھی فعال نہیں — Account not active" : "لاگ ان ناکام — Login failed",
+            description: msg || "غلط شناخت یا پاس ورڈ",
             variant: "destructive",
           });
+          if (isPending) {
+            setTimeout(() => setLocation("/pending-verification"), 1500);
+          }
         },
       }
     );
