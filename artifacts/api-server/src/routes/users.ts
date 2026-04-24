@@ -235,6 +235,72 @@ router.patch("/users/:id", async (req, res): Promise<void> => {
   res.json(toUserResponse(user));
 });
 
+/**
+ * PATCH /users/:id/admin-update
+ * Admin-only flexible update for assignment fields.
+ * Accepts any subset of: assignedTeacherId, whatsappGroupLink, classLink,
+ * classPlatform, feeStatus, course, status.
+ */
+router.patch("/users/:id/admin-update", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (Number.isNaN(id)) {
+    res.status(400).json({ error: "Invalid user id" });
+    return;
+  }
+
+  const body = req.body ?? {};
+  const update: Record<string, unknown> = {};
+
+  if (typeof body.assignedTeacherId === "number" || body.assignedTeacherId === null) {
+    update.assignedTeacherId = body.assignedTeacherId;
+  }
+  if (typeof body.whatsappGroupLink === "string" || body.whatsappGroupLink === null) {
+    update.whatsappGroupLink = body.whatsappGroupLink || null;
+  }
+  if (typeof body.classLink === "string" || body.classLink === null) {
+    update.classLink = body.classLink || null;
+  }
+  if (typeof body.classPlatform === "string" || body.classPlatform === null) {
+    update.classPlatform = body.classPlatform || null;
+  }
+  if (body.feeStatus === "paid" || body.feeStatus === "unpaid") {
+    update.feeStatus = body.feeStatus;
+  }
+  if (typeof body.course === "string" || body.course === null) {
+    update.course = body.course || null;
+  }
+  if (["pending", "active", "verified", "suspended", "trial"].includes(body.status)) {
+    update.status = body.status;
+  }
+  if (typeof body.newPassword === "string" && body.newPassword.length >= 6) {
+    update.passwordHash = await bcrypt.hash(body.newPassword, 10);
+  }
+
+  if (Object.keys(update).length === 0) {
+    res.status(400).json({ error: "No valid fields to update" });
+    return;
+  }
+
+  const [user] = await db
+    .update(usersTable)
+    .set(update)
+    .where(eq(usersTable.id, id))
+    .returning();
+
+  if (!user) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  await db.insert(activityLogTable).values({
+    type: "admin_update",
+    description: `Admin updated user ${user.fullName}: ${Object.keys(update).join(", ")}`,
+    actorName: "admin",
+  });
+
+  res.json(toUserResponse(user));
+});
+
 router.delete("/users/:id", async (req, res): Promise<void> => {
   const params = DeleteUserParams.safeParse(req.params);
   if (!params.success) {

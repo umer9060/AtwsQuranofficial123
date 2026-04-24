@@ -31,6 +31,16 @@ export const usersTable = pgTable("users", {
   languagesSpoken: text("languages_spoken"),
   coursesStudied: text("courses_studied"),
   demoVideoUrls: text("demo_video_urls"),
+  // ─── Admin assignment fields ───
+  assignedTeacherId: integer("assigned_teacher_id"),
+  whatsappGroupLink: text("whatsapp_group_link"),
+  classLink: text("class_link"),
+  classPlatform: text("class_platform"),  // zoom | meet | teams | telegram | imo
+  feeStatus: text("fee_status").notNull().default("unpaid"),  // paid | unpaid
+  course: text("course"),
+  qualification: text("qualification"),
+  experience: text("experience"),
+  languagePreference: text("language_preference").notNull().default("ur"),
 });
 
 export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true, updatedAt: true });

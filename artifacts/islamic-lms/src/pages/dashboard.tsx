@@ -1,16 +1,20 @@
 import { useGetDashboardStats, useGetAdminStats, useListUsers, useListPayments } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Users, BookOpen, Video, BookText, CreditCard, TrendingUp, Clock, UserCheck, AlertTriangle, UserX, Activity, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, BookOpen, Video, BookText, CreditCard, TrendingUp, Clock, UserCheck, AlertTriangle, UserX, Activity, ArrowRight, MessageCircle, Link2, GraduationCap, DollarSign } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import { Link } from "wouter";
+import { useAuth } from "@/lib/auth";
 
 export default function Dashboard() {
+  const { user } = useAuth();
   const { data: stats, isLoading: statsLoading } = useGetDashboardStats();
   const { data: adminStats, isLoading: adminLoading } = useGetAdminStats();
   const { data: users } = useListUsers({});
   const { data: payments } = useListPayments({});
 
+  const isStudent = user?.role === "male_student" || user?.role === "female_student";
   const isLoading = statsLoading || adminLoading;
 
   if (isLoading) {
@@ -30,9 +34,15 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-1">
-        <h2 className="text-3xl font-bold tracking-tight font-serif text-primary">Dashboard</h2>
-        <p className="text-muted-foreground">AtwsQuranofficial — Academy Overview</p>
+        <h2 className="text-3xl font-bold tracking-tight font-serif text-primary">
+          {isStudent ? `Assalamu Alaikum, ${user?.fullName?.split(" ")[0]}` : "Dashboard"}
+        </h2>
+        <p className="text-muted-foreground">
+          {isStudent ? "آپ کا اکاؤنٹ — My Account" : "AtwsQuranofficial — Academy Overview"}
+        </p>
       </div>
+
+      {isStudent && <StudentAssignmentCard user={user} users={users} />}
 
       {/* Primary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -244,6 +254,86 @@ function StatusRow({ label, value, color }: { label: string; value: number; colo
       </div>
       <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full`} style={{ width: `${Math.min((value / Math.max(total, 10)) * 100, 100)}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function StudentAssignmentCard({ user, users }: { user: any; users: any[] | undefined }) {
+  const me = users?.find(u => u.id === user?.id) || user;
+  const teacher = me?.assignedTeacherId ? users?.find(u => u.id === me.assignedTeacherId) : null;
+  const feeUnpaid = me?.feeStatus !== "paid";
+  const platformLabels: Record<string, string> = {
+    zoom: "Zoom", meet: "Google Meet", teams: "MS Teams", telegram: "Telegram", imo: "IMO",
+  };
+
+  return (
+    <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <GraduationCap className="w-5 h-5 text-primary" />
+            My Class Information — میری کلاس کی معلومات
+          </CardTitle>
+          <Badge variant={feeUnpaid ? "destructive" : "default"} className={feeUnpaid ? "" : "bg-green-600"}>
+            <DollarSign className="w-3 h-3 mr-0.5" />
+            Fee: {me?.feeStatus === "paid" ? "Paid ✓" : "Unpaid"}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="grid sm:grid-cols-2 gap-3 text-sm">
+          <InfoRow icon={BookOpen} label="Course / کورس" value={me?.course || "Not assigned yet"} />
+          <InfoRow
+            icon={UserCheck}
+            label="Teacher / استاد"
+            value={teacher ? `${teacher.fullName} (${teacher.role})` : "Not assigned yet"}
+          />
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-2 pt-2">
+          {me?.whatsappGroupLink ? (
+            <Button asChild variant="outline" className="bg-green-50 border-green-200 hover:bg-green-100 text-green-800 justify-start">
+              <a href={me.whatsappGroupLink} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4 mr-2" /> Join WhatsApp Group
+              </a>
+            </Button>
+          ) : (
+            <div className="text-xs text-muted-foreground p-2 border border-dashed rounded">
+              <MessageCircle className="w-4 h-4 inline mr-1 opacity-50" /> WhatsApp group will appear after admin assigns it
+            </div>
+          )}
+
+          {me?.classLink ? (
+            <Button asChild variant="outline" className="bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-800 justify-start">
+              <a href={me.classLink} target="_blank" rel="noopener noreferrer">
+                <Video className="w-4 h-4 mr-2" /> Join Class ({platformLabels[me.classPlatform] || me.classPlatform || "Online"})
+              </a>
+            </Button>
+          ) : (
+            <div className="text-xs text-muted-foreground p-2 border border-dashed rounded">
+              <Link2 className="w-4 h-4 inline mr-1 opacity-50" /> Class link will appear when scheduled
+            </div>
+          )}
+        </div>
+
+        {feeUnpaid && (
+          <div className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded p-2 mt-2">
+            ⚠ آپ کی فیس ابھی ادا نہیں ہوئی۔ Please contact admin to pay your fee.
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function InfoRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <Icon className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+      <div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+        <div className="font-medium text-foreground">{value}</div>
       </div>
     </div>
   );
