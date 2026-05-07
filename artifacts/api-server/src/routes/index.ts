@@ -9,6 +9,7 @@ import liveClassesRouter from "./live_classes";
 import qnaRouter from "./qna";
 import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
+import ulemaRouter from "./ulema";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(liveClassesRouter);
 router.use(qnaRouter);
 router.use(dashboardRouter);
 router.use(paymentsRouter);
+router.use(ulemaRouter);
 
 export default router;

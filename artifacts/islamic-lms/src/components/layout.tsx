@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import {
   LogOut, Home, Users, BookOpen, Book, BookText, Video,
   MessageSquare, Shield, CreditCard, UserCheck, Search,
-  ChevronDown, ChevronRight, GraduationCap, Menu, X, Library
+  ChevronDown, ChevronRight, GraduationCap, Menu, X, Library, Star
 } from "lucide-react";
 import { Button } from "./ui/button";
 
@@ -28,8 +28,8 @@ export function Layout({ children }: LayoutProps) {
   );
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const publicPaths = ["/", "/login", "/register", "/library", "/scholars"];
-  if (!user || publicPaths.includes(location)) {
+  const publicPaths = ["/", "/login", "/register", "/library", "/scholars", "/ulema"];
+  if (!user || publicPaths.includes(location) || location.startsWith("/ulema")) {
     return <>{children}</>;
   }
 
@@ -52,6 +52,7 @@ export function Layout({ children }: LayoutProps) {
     { name: "User Management", href: "/admin/users", icon: Shield },
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Verification", href: "/admin/verification", icon: UserCheck },
+    { name: "علماء کرام", href: "/admin/ulema", icon: Star },
   ];
 
   const isActive = (href: string) => location === href;

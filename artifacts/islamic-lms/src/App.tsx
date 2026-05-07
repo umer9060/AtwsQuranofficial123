@@ -29,6 +29,8 @@ import Scholars from "@/pages/scholars";
 import Reader from "@/pages/reader";
 import ForgotPassword from "@/pages/forgot-password";
 import PendingVerification from "@/pages/pending-verification";
+import UlemaPage from "@/pages/ulema";
+import AdminUlema from "@/pages/admin-ulema";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +43,7 @@ function Router() {
       <Route path="/register" component={Register} />
       <Route path="/library" component={DarseNizami} />
       <Route path="/scholars" component={Scholars} />
+      <Route path="/ulema" component={UlemaPage} />
       <Route path="/reader" component={Reader} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/pending-verification" component={PendingVerification} />
@@ -60,6 +63,7 @@ function Router() {
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/payments" component={Payments} />
       <Route path="/admin/verification" component={Verification} />
+      <Route path="/admin/ulema" component={AdminUlema} />
       <Route component={NotFound} />
     </Switch>
   );

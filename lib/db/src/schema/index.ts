@@ -6,3 +6,4 @@ export * from "./live_classes";
 export * from "./qna";
 export * from "./activity_log";
 export * from "./payments";
+export * from "./ulema";
