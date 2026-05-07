@@ -2,28 +2,19 @@
 
 ## Pre-requisites
 
-Before deploying, you must set these environment variables in your Netlify site settings
+Before deploying, set these environment variables in your Netlify site settings
 (Site → Environment Variables):
 
 | Variable | Description |
 |----------|-------------|
-| `DATABASE_URL` | PostgreSQL connection string (same as your Replit DATABASE_URL) |
+| `DATABASE_URL` | PostgreSQL connection string (external hosted Postgres, e.g. Neon, Supabase) |
 
-> **Important:** Netlify Functions cannot use the Replit-managed PostgreSQL.
-> You need an external PostgreSQL database (e.g. Neon, Supabase, Railway, or any hosted Postgres).
-> Copy the connection string from that provider and paste it as `DATABASE_URL`.
+> **Note:** Netlify Functions cannot use the Replit-managed PostgreSQL.
+> Get a free external Postgres from https://neon.tech and paste the connection string as `DATABASE_URL`.
 
 ## Deploy Steps
 
-### Option A — Netlify CLI (recommended)
-```bash
-npm install -g netlify-cli
-netlify login
-netlify init
-netlify deploy --prod
-```
-
-### Option B — Connect via GitHub
+### Option A — Connect via GitHub (easiest)
 1. Push this repo to GitHub
 2. Go to https://app.netlify.com → "Add new site" → "Import an existing project"
 3. Select your GitHub repo
@@ -33,18 +24,26 @@ netlify deploy --prod
 5. Add `DATABASE_URL` under Site → Environment Variables
 6. Click **Deploy**
 
+### Option B — Netlify CLI
+```bash
+npm install -g netlify-cli
+netlify login
+netlify init
+netlify deploy --prod
+```
+
 ## How it works
 
 | Layer | Technology | Where it runs |
 |-------|-----------|--------------|
-| Frontend | React + Vite | Netlify CDN (static) |
-| Backend API | Express (wrapped) | Netlify Function (`netlify/functions/netlify-handler.mjs`) |
+| Frontend | React + Vite | Netlify CDN (static files) |
+| Backend API | Express (serverless) | Netlify Function (`netlify/functions/netlify-handler.mjs`) |
 | Database | PostgreSQL | External hosted Postgres |
 
-- All `/api/*` requests are proxied to the Netlify Function
-- All other routes serve `index.html` (SPA routing)
+- `/api/*` requests → Netlify Function (your full Express API)
+- All other routes → `index.html` (SPA routing support)
 
-## Demo credentials (after seeding your DB)
+## Demo login credentials (after seeding your DB)
 - Admin: `admin@atwsquran.com` / `admin123`
 - Teacher: `teacher@atwsquran.com` / `teacher123`
 - Student: `student@atwsquran.com` / `student123`
