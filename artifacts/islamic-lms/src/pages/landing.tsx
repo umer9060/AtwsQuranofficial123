@@ -338,7 +338,7 @@ export default function Landing() {
                   📚 مکتبہ کتاب
                 </button>
               </Link>
-              <Link href="/scholars">
+              <Link href="/ulema">
                 <button className="px-3 py-2 text-sm text-green-700 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors font-medium">
                   👨‍🎓 علماء
                 </button>
@@ -396,7 +396,7 @@ export default function Landing() {
                 📚 مکتبہ کتاب (Book Library)
               </button>
             </Link>
-            <Link href="/scholars">
+            <Link href="/ulema">
               <button onClick={() => setMobileMenuOpen(false)} className="w-full text-left px-3 py-2 text-sm text-green-700 font-medium hover:bg-green-50 rounded-md">
                 👨‍🎓 علماء کا کتب خانہ
               </button>
@@ -861,7 +861,7 @@ export default function Landing() {
                   <div><a href="#courses" className="hover:text-white transition-colors">📚 Courses</a></div>
                   <div><a href="#admission" className="hover:text-white transition-colors">🎓 Admission</a></div>
                   <div><Link href="/library"><span className="hover:text-white transition-colors cursor-pointer">📖 مکتبہ کتاب (Book Library)</span></Link></div>
-                  <div><Link href="/scholars"><span className="hover:text-white transition-colors cursor-pointer">👨‍🎓 علماء کا کتب خانہ</span></Link></div>
+                  <div><Link href="/ulema"><span className="hover:text-white transition-colors cursor-pointer">👨‍🎓 علماء کا کتب خانہ</span></Link></div>
                   <div><Link href="/login"><span className="hover:text-white transition-colors cursor-pointer">🔑 Student Login</span></Link></div>
                 </div>
               </div>
