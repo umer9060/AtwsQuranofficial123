@@ -10,6 +10,7 @@ import qnaRouter from "./qna";
 import dashboardRouter from "./dashboard";
 import paymentsRouter from "./payments";
 import ulemaRouter from "./ulema";
+import leadsRouter from "./leads";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(qnaRouter);
 router.use(dashboardRouter);
 router.use(paymentsRouter);
 router.use(ulemaRouter);
+router.use(leadsRouter);
 
 export default router;

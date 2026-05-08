@@ -29,7 +29,7 @@ export function Layout({ children }: LayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const publicPaths = ["/", "/login", "/register", "/library", "/scholars", "/ulema"];
-  if (!user || publicPaths.includes(location) || location.startsWith("/ulema")) {
+  if (!user || publicPaths.includes(location) || location.startsWith("/ulema") || location.startsWith("/lead")) {
     return <>{children}</>;
   }
 
@@ -53,6 +53,7 @@ export function Layout({ children }: LayoutProps) {
     { name: "Payments", href: "/admin/payments", icon: CreditCard },
     { name: "Verification", href: "/admin/verification", icon: UserCheck },
     { name: "علماء کرام", href: "/admin/ulema", icon: Star },
+    { name: "Leads", href: "/admin/leads", icon: Users },
   ];
 
   const isActive = (href: string) => location === href;

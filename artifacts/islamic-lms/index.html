@@ -8,6 +8,47 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- ======================================================
+         FACEBOOK PIXEL
+         FB_PIXEL_ID کی جگہ اپنا Pixel ID لگائیں
+         مثلاً: var FB_PIXEL_ID = '1234567890123456';
+    ====================================================== -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      var FB_PIXEL_ID = 'XXXXXXXXXXXXXXXXXX';
+      if (FB_PIXEL_ID && FB_PIXEL_ID !== 'XXXXXXXXXXXXXXXXXX') {
+        fbq('init', FB_PIXEL_ID);
+        fbq('track', 'PageView');
+      }
+    </script>
+
+    <!-- ======================================================
+         GOOGLE TAG (GA4 + Google Ads)
+         GOOGLE_TAG_ID کی جگہ اپنا Tag ID لگائیں
+         مثلاً: var GOOGLE_TAG_ID = 'G-XXXXXXXXXX';
+    ====================================================== -->
+    <script>
+      var GOOGLE_TAG_ID = 'G-XXXXXXXXXX';
+      if (GOOGLE_TAG_ID && GOOGLE_TAG_ID !== 'G-XXXXXXXXXX') {
+        var _gs = document.createElement('script');
+        _gs.async = true;
+        _gs.src = 'https://www.googletagmanager.com/gtag/js?id=' + GOOGLE_TAG_ID;
+        document.head.appendChild(_gs);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', GOOGLE_TAG_ID);
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

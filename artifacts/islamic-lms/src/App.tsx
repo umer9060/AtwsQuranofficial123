@@ -31,6 +31,9 @@ import ForgotPassword from "@/pages/forgot-password";
 import PendingVerification from "@/pages/pending-verification";
 import UlemaPage from "@/pages/ulema";
 import AdminUlema from "@/pages/admin-ulema";
+import LeadForm from "@/pages/lead-form";
+import LeadLanding from "@/pages/lead-landing";
+import AdminLeads from "@/pages/admin-leads";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +47,9 @@ function Router() {
       <Route path="/library" component={DarseNizami} />
       <Route path="/scholars" component={Scholars} />
       <Route path="/ulema" component={UlemaPage} />
+      <Route path="/lead/boys" component={() => <LeadLanding gender="boys" />} />
+      <Route path="/lead/girls" component={() => <LeadLanding gender="girls" />} />
+      <Route path="/lead/:gender/:course" component={LeadForm} />
       <Route path="/reader" component={Reader} />
       <Route path="/forgot-password" component={ForgotPassword} />
       <Route path="/pending-verification" component={PendingVerification} />
@@ -64,6 +70,7 @@ function Router() {
       <Route path="/admin/payments" component={Payments} />
       <Route path="/admin/verification" component={Verification} />
       <Route path="/admin/ulema" component={AdminUlema} />
+      <Route path="/admin/leads" component={AdminLeads} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -7,3 +7,4 @@ export * from "./qna";
 export * from "./activity_log";
 export * from "./payments";
 export * from "./ulema";
+export * from "./leads";
