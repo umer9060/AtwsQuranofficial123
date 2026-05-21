@@ -56,6 +56,13 @@ function toUserResponse(u: typeof usersTable.$inferSelect) {
     languagesSpoken: u.languagesSpoken ?? null,
     coursesStudied: u.coursesStudied ?? null,
     demoVideoUrls: u.demoVideoUrls ?? null,
+    // Assignment fields
+    assignedTeacherId: u.assignedTeacherId ?? null,
+    whatsappGroupLink: u.whatsappGroupLink ?? null,
+    classLink: u.classLink ?? null,
+    classPlatform: u.classPlatform ?? null,
+    feeStatus: u.feeStatus ?? "unpaid",
+    course: u.course ?? null,
   };
 }
 
